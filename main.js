@@ -1,5 +1,7 @@
 var http = require('http');
 var os = require('os');
+var primaryListener = require('prime');
+var myl = require('mysqlLink');
 
 const PRIMARY_PORT = 18081;
 const SECONDARY_PORT = 18082;
@@ -24,8 +26,7 @@ handleStatusRequest = function(req, res)
 
 priParseArgs = function(req, res)
 {
-	res.writeHead(404, {'Content-Type': 'text/html'});
-	res.end(req.url + " not found.");
+	primaryListener.handleRequest(req, res);
 }
 
 secParseArgs = function(req, res)

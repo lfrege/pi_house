@@ -1,18 +1,55 @@
 var http = require('http');
 var os = require('os');
 
-http.createServer(function(req, res)
+const PRIMARY_PORT = 18081;
+const SECONDARY_PORT = 18082;
+
+systemStatPackage = function()
 {
-	var key;
+	this.platform = process.platform;
+	this.load = os.loadavg();
+	this.totalmem = os.totalmem();
+	this.freemem = os.freemem();
+	this.hostname = os.hostname();
+}
+
+handleStatusRequest = function(req, res)
+{
+	var pkg = new systemStatPackage();
 	res.writeHead(200, {'Content-Type': 'text/html'});
 
-	res.write('<html>\n<head></head>\n<body>\n');
+	res.end(JSON.stringify(pkg));
+}
 
-	res.write('platform:' + process.platform + '<br/>\n');
-	res.write('cpu:' + os.loadavg() + '<br/>\n');
-	res.write('total mem:' + os.totalmem() + '<br/>\n');
-	res.write('free mem:' + os.freemem() + '<br/>\n');
 
-	res.end('</body>\n</html>\n');
+priParseArgs = function(req, res)
+{
+	res.writeHead(404, {'Content-Type': 'text/html'});
+	res.end(req.url + " not found.");
+}
 
-}).listen(8080, '127.0.0.1');
+secParseArgs = function(req, res)
+{
+	if (req.url == "/status")
+	{
+		handleStatusRequest(req,res);
+	}
+	else
+	{
+		res.writeHead(404, {'Content-Type': 'text/html'});
+		res.end(req.url + " not found.");
+	}
+
+}
+
+for (var i = 0; i < process.argv.length; i++)
+{
+	if (process.argv[i] == "primary")
+	{
+		console.log("starting primary...");
+		http.createServer(priParseArgs).listen(PRIMARY_PORT);
+		i = process.argv.length;
+	}
+}
+
+http.createServer(secParseArgs).listen(SECONDARY_PORT);

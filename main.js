@@ -2,6 +2,7 @@ var http = require('http');
 var os = require('os');
 var primaryListener = require('prime');
 var myl = require('mysqlLink');
+var psa = require('primeStatusAdv');
 
 const PRIMARY_PORT = 18081;
 const SECONDARY_PORT = 18082;
@@ -50,6 +51,7 @@ for (var i = 0; i < process.argv.length; i++)
 		console.log("starting primary...");
 		http.createServer(priParseArgs).listen(PRIMARY_PORT);
 		i = process.argv.length;
+		psa.startQueries();
 	}
 }
 
